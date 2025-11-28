@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { SYNTXVisuals } from '@/components/syntx/syntx-visuals'
 import { SYNTXNetwork } from '@/components/syntx/syntx-network'
+import { CyberLogo} from '@/components/syntx/cyber-logo'
 
 const SYNTX_MODES = ['TRUE_RAW', 'CYBERDARK', 'SIGMA', 'FIELD_HYGIENE'] as const
 
@@ -167,6 +168,7 @@ export default function SYNTXOS() {
               <div className={`text-4xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent transition-all duration-1000 ${
                 pulse ? 'scale-105 brightness-125' : 'scale-100'
               }`}>
+                 <CyberLogo />
                 SYNTX
               </div>
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-30 animate-pulse"></div>
