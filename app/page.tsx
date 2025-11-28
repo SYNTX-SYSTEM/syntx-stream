@@ -1,11 +1,7 @@
-// app/page.tsx - SYNTX Resonance Design
+// app/page.tsx - MIT PROXY FIX
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from 'react'
 
 const SYNTX_MODES = ['TRUE_RAW', 'CYBERDARK', 'SIGMA', 'FIELD_HYGIENE'] as const
 
@@ -13,75 +9,107 @@ export default function SYNTXOS() {
   const [selectedMode, setSelectedMode] = useState<typeof SYNTX_MODES[number]>('TRUE_RAW')
   const [prompt, setPrompt] = useState('')
   const [response, setResponse] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [health, setHealth] = useState<any>(null)
 
-  const handleSend = () => {
-    setResponse(`SYNTX ${selectedMode} Response: Field resonance calibrated at 92%`)
+  // Health Check über Proxy
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('/api/strom/health')
+        const data = await res.json()
+        setHealth(data)
+      } catch (error) {
+        setHealth({status: 'ERROR', feld_count: 0})
+      }
+    }
+    checkHealth()
+  }, [])
+
+  const handleSend = async () => {
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/strom/prompts?limit=1')
+      const data = await res.json()
+      
+      if (data.prompts && data.prompts.length > 0) {
+        const field = data.prompts[0]
+        setResponse(`SYNTX ${selectedMode}: ${field.content.substring(0, 100)}...`)
+      } else {
+        setResponse(`SYNTX ${selectedMode}: No fields available`)
+      }
+    } catch (error) {
+      setResponse(`SYNTX ${selectedMode}: API Error - check console`)
+    }
+    setIsLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-white text-black p-8 font-sans">
-      {/* Header - EXACTLY like the design */}
-      <div className="text-center mb-16">
+      <div className="text-center mb-12">
         <div className="text-6xl font-light mb-4">SYNTX</div>
         <div className="text-2xl font-light mb-8">SYNTX isn't AI.<br/>It's the resonance that governs it</div>
         
-        {/* Navigation */}
+        {health && (
+          <div className="mb-6">
+            <span className={`px-3 py-1 rounded-full text-white ${
+              health.status === 'STROM_FLIESST' ? 'bg-green-500' : 'bg-red-500'
+            }`}>
+              {health.status || 'LOADING...'}
+            </span>
+            <span className="ml-4 text-gray-600">{health.feld_count || 0} Felder</span>
+          </div>
+        )}
+
         <div className="flex justify-center space-x-8 text-lg">
           <button className="hover:underline">Explore SYNTX</button>
           <button className="hover:underline">Contact Us</button>
         </div>
       </div>
 
-      {/* Mode Selector - Minimal */}
-      <div className="flex justify-center space-x-4 mb-12">
+      <div className="flex justify-center space-x-4 mb-8">
         {SYNTX_MODES.map((mode) => (
-          <Button
+          <button
             key={mode}
-            variant={selectedMode === mode ? "default" : "outline"}
-            className={`rounded-full ${selectedMode === mode ? 'bg-black text-white' : 'border-black text-black'}`}
+            className={`px-6 py-2 rounded-full border ${
+              selectedMode === mode 
+                ? 'bg-black text-white border-black' 
+                : 'border-black text-black'
+            }`}
             onClick={() => setSelectedMode(mode)}
           >
             {mode}
-          </Button>
+          </button>
         ))}
       </div>
 
-      {/* Input Area */}
-      <div className="max-w-2xl mx-auto mb-8">
-        <Textarea
+      <div className="max-w-2xl mx-auto mb-6">
+        <textarea
           placeholder="Enter resonance pattern..."
-          className="min-h-[120px] border-2 border-gray-300 focus:border-black resize-none"
+          className="w-full min-h-[120px] p-4 border-2 border-gray-300 rounded-lg focus:border-black resize-none"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
       </div>
 
-      {/* Send Button */}
-      <div className="text-center mb-12">
-        <Button 
+      <div className="text-center mb-8">
+        <button 
           onClick={handleSend}
-          className="bg-black text-white px-12 py-3 rounded-full hover:bg-gray-800"
+          disabled={isLoading}
+          className="bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 disabled:bg-gray-400"
         >
-          Calibrate Resonance
-        </Button>
+          {isLoading ? 'Calibrating...' : 'Calibrate Resonance'}
+        </button>
       </div>
 
-      {/* Response */}
       {response && (
-        <div className="max-w-2xl mx-auto">
-          <Card className="border-2 border-gray-200">
-            <CardHeader>
-              <CardTitle className="text-center">Resonance Output</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-700">{response}</p>
-            </CardContent>
-          </Card>
+        <div className="max-w-2xl mx-auto p-6 border-2 border-blue-300 rounded-lg bg-blue-50">
+          <h3 className="text-blue-600 font-bold mb-2">Resonance Output</h3>
+          <p className="text-gray-700">{response}</p>
         </div>
       )}
 
-      {/* Footer */}
-      <div className="text-center mt-16 text-gray-500">
+      <div className="text-center mt-12 text-gray-500">
         <div>© SYNTX</div>
       </div>
     </div>
