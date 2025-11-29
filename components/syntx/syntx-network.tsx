@@ -25,11 +25,36 @@ interface NetworkNode {
   pulse: number
 }
 
-export function SYNTXNetwork({ fields }: { fields: Field[] }) {
+export function SYNTXNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [nodes, setNodes] = useState<NetworkNode[]>([])
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null)
   const [pulse, setPulse] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [fields, setFields] = useState<Field[]>([])
+
+  // Lade Felder-Daten vom API-Endpoint
+  useEffect(() => {
+    const loadFields = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const fieldsRes = await fetch('https://dev.syntx-system.com/feld/prompts?limit=40')
+        if (!fieldsRes.ok) {
+          throw new Error(`Failed to load fields: ${fieldsRes.status}`)
+        }
+        const fieldsData = await fieldsRes.json()
+        setFields(fieldsData.prompts || [])
+      } catch (error) {
+        console.error('Failed to load network data:', error)
+        setError('Failed to load network data from server')
+      }
+      setIsLoading(false)
+    }
+
+    loadFields()
+  }, [])
 
   // Cyberdark Farbpalette
   const COLORS = {
@@ -56,6 +81,8 @@ export function SYNTXNetwork({ fields }: { fields: Field[] }) {
 
   // Nodes initialisieren
   useEffect(() => {
+    if (fields.length === 0) return
+
     const newNodes: NetworkNode[] = fields.map((field, index) => {
       const angle = (index / fields.length) * Math.PI * 2
       const distance = 150 + Math.random() * 200
@@ -322,6 +349,31 @@ export function SYNTXNetwork({ fields }: { fields: Field[] }) {
     return 'other'
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Network Error</div>
+          <div className="text-gray-400 mb-4">{error}</div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded"
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* NETWORK HEADER */}
@@ -413,6 +465,10 @@ export function SYNTXNetwork({ fields }: { fields: Field[] }) {
               <div className="flex justify-between">
                 <span className="text-gray-400">Connections:</span>
                 <span className="text-cyan-400 font-mono">{selectedNode.connections.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Cost:</span>
+                <span className="text-yellow-400 font-mono">{selectedNode.field.cost_field.toFixed(4)}</span>
               </div>
             </div>
           </div>

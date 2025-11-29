@@ -34,6 +34,7 @@ export function SYNTXVisuals() {
   const [fields, setFields] = useState<Field[]>([])
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadAllData()
@@ -41,23 +42,34 @@ export function SYNTXVisuals() {
 
   const loadAllData = async () => {
     setIsLoading(true)
+    setError(null)
     try {
-      // Lade alle Felder
-      const fieldsRes = await fetch('/api/strom/prompts?limit=40')
+      // Korrekte Endpoints laut Dokumentation
+      const fieldsRes = await fetch('https://dev.syntx-system.com/feld/prompts?limit=40')
+      if (!fieldsRes.ok) {
+        throw new Error(`Failed to load fields: ${fieldsRes.status}`)
+      }
       const fieldsData = await fieldsRes.json()
       setFields(fieldsData.prompts || [])
 
-      // Lade Analytics
-      const analyticsRes = await fetch('/api/strom/analytics/temporal')
-      const analyticsData = await analyticsRes.json()
-      setAnalytics(analyticsData)
+      // Korrekter Analytics Endpoint
+      const analyticsRes = await fetch('https://dev.syntx-system.com/feld/analytics/temporal')
+      if (!analyticsRes.ok) {
+        // Wenn analytics endpoint nicht existiert, setze analytics auf null und fahre fort
+        console.warn('Analytics endpoint not available, continuing without analytics data')
+        setAnalytics(null)
+      } else {
+        const analyticsData = await analyticsRes.json()
+        setAnalytics(analyticsData)
+      }
     } catch (error) {
-      console.error('Failed to load data')
+      console.error('Failed to load data:', error)
+      setError('Failed to load data from server')
     }
     setIsLoading(false)
   }
 
-  // Kategorie Mapping (aus page.tsx)
+  // Kategorie Mapping
   function getCategory(topic: string): string {
     const categoryMap: Record<string, string> = {
       'Militärische Taktiken': 'grenzwertig',
@@ -100,7 +112,7 @@ export function SYNTXVisuals() {
     return 'other'
   }
 
-  // Berechne Chart-Daten
+  // Berechne Chart-Daten basierend auf echten Daten
   const categoryData = Object.entries(
     fields.reduce((acc: Record<string, number>, field) => {
       const category = getCategory(field.topic)
@@ -112,7 +124,7 @@ export function SYNTXVisuals() {
   const qualityData = fields.map(field => ({
     name: field.id.replace('feld_', ''),
     quality: field.quality_score,
-    cost: field.cost_field * 1000 // Für bessere Darstellung
+    cost: field.cost_field * 1000
   }))
 
   const styleData = Object.entries(
@@ -126,6 +138,23 @@ export function SYNTXVisuals() {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Error</div>
+          <div className="text-gray-400 mb-4">{error}</div>
+          <button 
+            onClick={loadAllData}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }
@@ -169,7 +198,7 @@ export function SYNTXVisuals() {
             <TrendingUp className="w-6 h-6 text-green-400" />
             <div>
               <div className="text-2xl font-bold text-white">
-                {(fields.reduce((acc, f) => acc + f.quality_score, 0) / fields.length).toFixed(1)}
+                {fields.length > 0 ? (fields.reduce((acc, f) => acc + f.quality_score, 0) / fields.length).toFixed(1) : '0.0'}
               </div>
               <div className="text-gray-400 text-sm">Avg Quality</div>
             </div>
@@ -206,7 +235,7 @@ export function SYNTXVisuals() {
                   <div className="w-20 bg-gray-600 rounded-full h-2">
                     <div 
                       className="bg-gradient-to-r from-blue-400 to-purple-400 h-2 rounded-full transition-all duration-1000"
-                      style={{ width: `${(category.value / fields.length) * 100}%` }}
+                      style={{ width: `${fields.length > 0 ? (category.value / fields.length) * 100 : 0}%` }}
                     ></div>
                   </div>
                   <span className="text-blue-400 font-bold">{category.value}</span>
@@ -253,7 +282,7 @@ export function SYNTXVisuals() {
                 <div className="text-2xl font-bold text-cyan-400 mb-1">{style.value}</div>
                 <div className="text-white text-sm capitalize">{style.name}</div>
                 <div className="text-gray-400 text-xs">
-                  {((style.value / fields.length) * 100).toFixed(1)}%
+                  {fields.length > 0 ? ((style.value / fields.length) * 100).toFixed(1) : '0.0'}%
                 </div>
               </div>
             ))}
@@ -266,7 +295,7 @@ export function SYNTXVisuals() {
             <Network className="w-5 h-5 mr-2 text-green-400" />
             Generation Timeline
           </h3>
-          {analytics && (
+          {analytics ? (
             <div className="space-y-4">
               <div className="flex justify-between text-sm text-gray-400">
                 <span>Start: {new Date(analytics.temporal_analytics.time_span.earliest).toLocaleTimeString()}</span>
@@ -280,6 +309,10 @@ export function SYNTXVisuals() {
                   fields generated in {analytics.temporal_analytics.time_span.total_days} day(s)
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 py-8">
+              Analytics data not available
             </div>
           )}
         </div>

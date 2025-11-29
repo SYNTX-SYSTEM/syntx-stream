@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { FieldDataGrid } from '@/components/syntx/field-datagrid'
+import { QueueDashboard } from '@/components/syntx/queue-dashboard' // NEU: QueueDashboard importieren
 import { 
   Activity, Zap, TrendingUp, Database, 
   Network, BarChart3, Filter, Settings,
@@ -26,7 +27,7 @@ interface Field {
 
 export default function SYNTXOS() {
   const [selectedMode, setSelectedMode] = useState<typeof SYNTX_MODES[number]>('CYBERDARK')
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'datagrid' | 'analytics' | 'network'>('datagrid')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'datagrid' | 'analytics' | 'network'>('dashboard') // Default auf Dashboard geändert
   const [health, setHealth] = useState<any>(null)
   const [allFields, setAllFields] = useState<Field[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -49,14 +50,16 @@ export default function SYNTXOS() {
     return () => clearInterval(interval)
   }, [])
 
-  // Health Check
+  // Health Check - AUFGEPASST: Jetzt mit echten Endpoints
   useEffect(() => {
     const loadHealth = async () => {
       try {
-        const res = await fetch('/api/strom/health')
+        // Direkter Call zur SYNTX API statt Proxy
+        const res = await fetch('https://dev.syntx-system.com/strom/health')
         const data = await res.json()
         setHealth(data)
       } catch (error) {
+        console.error('Health check failed:', error)
         setHealth({status: 'NETZ_BLOCKIERT', feld_count: 0})
       }
     }
@@ -65,17 +68,20 @@ export default function SYNTXOS() {
     return () => clearInterval(interval)
   }, [])
 
-  // Load ALL Fields
+  // Load ALL Fields - AUFGEPASST: Echte SYNTX API
   const loadAllFields = async () => {
     setIsLoading(true)
     try {
-      const res = await fetch('/api/strom/prompts?limit=40')
+      // Direkter Call zur SYNTX API
+      const res = await fetch('https://dev.syntx-system.com/feld/prompts?limit=40')
       const data = await res.json()
       const fields = data.prompts || []
       setAllFields(fields)
       
       // Stats berechnen
-      const avgQuality = fields.reduce((acc: number, f: Field) => acc + f.quality_score, 0) / fields.length
+      const avgQuality = fields.length > 0 
+        ? fields.reduce((acc: number, f: Field) => acc + f.quality_score, 0) / fields.length 
+        : 0
       const categories = [...new Set(fields.map((f: Field) => getCategory(f.topic)))].length
       const styles = [...new Set(fields.map((f: Field) => f.style))].length
       
@@ -86,7 +92,7 @@ export default function SYNTXOS() {
         styles
       })
     } catch (error) {
-      console.log('Failed to load fields')
+      console.error('Failed to load fields:', error)
     }
     setIsLoading(false)
   }
@@ -160,7 +166,7 @@ export default function SYNTXOS() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-4 font-sans">
-      {/* HEADER */}
+      {/* HEADER - UNVERÄNDERT */}
       <div className="max-w-8xl mx-auto mb-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
@@ -311,7 +317,7 @@ export default function SYNTXOS() {
           </div>
         </div>
 
-        {/* Tab Content */}
+        {/* Tab Content - WICHTIG: Hier kommt das QueueDashboard */}
         <div className="p-6">
           {isLoading && activeTab === 'datagrid' ? (
             <div className="text-center py-16">
@@ -320,7 +326,45 @@ export default function SYNTXOS() {
             </div>
           ) : (
             <>
-              {/* DataGrid Tab */}
+              {/* DASHBOARD TAB mit QueueDashboard */}
+              {activeTab === 'dashboard' && (
+                <div className="space-y-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-white mb-2">SYNTX Live Dashboard</h2>
+                    <p className="text-gray-400">
+                      Real-time queue monitoring and system health with live SYNTX API data
+                    </p>
+                  </div>
+                  
+                  {/* QUEUE DASHBOARD KOMPONENTE */}
+                  <QueueDashboard />
+                  
+                  {/* Zusätzliche Stats Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                      <div className="text-cyan-400 text-sm font-medium mb-2">Total Fields</div>
+                      <div className="text-3xl font-bold text-white">{stats.totalFields}</div>
+                      <div className="text-gray-400 text-sm mt-2">Available in database</div>
+                    </div>
+                    
+                    <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                      <div className="text-green-400 text-sm font-medium mb-2">Avg Quality</div>
+                      <div className="text-3xl font-bold text-white">{stats.avgQuality.toFixed(1)}</div>
+                      <div className="text-gray-400 text-sm mt-2">Across all fields</div>
+                    </div>
+                    
+                    <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                      <div className="text-purple-400 text-sm font-medium mb-2">System Health</div>
+                      <div className={`text-3xl font-bold ${health?.status === 'STROM_FLIESST' ? 'text-green-400' : 'text-red-400'}`}>
+                        {health?.status || 'CHECKING'}
+                      </div>
+                      <div className="text-gray-400 text-sm mt-2">API Status</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DATAGRID Tab */}
               {activeTab === 'datagrid' && (
                 <div className="space-y-6">
                   <div className="text-center mb-8">
@@ -337,49 +381,29 @@ export default function SYNTXOS() {
                 </div>
               )}
 
-              {/* Other Tabs */}
+              {/* ANALYTICS Tab */}
               {activeTab === 'analytics' && (
-                  <div className="space-y-6">
+                <div className="space-y-6">
                   <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-2">SYNTX Analytics</h2>
-                  <p className="text-gray-400">
-                          Real-time field resonance visualization and temporal analysis
-                  </p>
+                    <h2 className="text-3xl font-bold text-white mb-2">SYNTX Analytics</h2>
+                    <p className="text-gray-400">
+                      Real-time field resonance visualization and temporal analysis
+                    </p>
+                  </div>
+                  <SYNTXVisuals />
                 </div>
-                <SYNTXVisuals />
-                </div>
-              )},
+              )}
 
-              // Network Tab ersetzen:
+              {/* NETWORK Tab */}
               {activeTab === 'network' && (
-                  <div className="space-y-6">
-                    <div className="text-center mb-8">
-                      <h2 className="text-3xl font-bold text-white mb-2">SYNTX Network Matrix</h2>
-                      <p className="text-gray-400">
-                        Interactive 3D field resonance visualization with real-time connections
-                      </p>
-                    </div>
-                    <SYNTXNetwork fields={allFields} />
-              </div>
-  )},
-              {activeTab !== 'datagrid' && (
-                <div className="text-center py-16">
-                  <div className="text-4xl mb-4">
-                    {activeTab === 'dashboard' && '📊'}
-                    {activeTab === 'analytics' && '📈'} 
-                    {activeTab === 'network' && '🕸️'}
+                <div className="space-y-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-white mb-2">SYNTX Network Matrix</h2>
+                    <p className="text-gray-400">
+                      Interactive 3D field resonance visualization with real-time connections
+                    </p>
                   </div>
-                  <div className="text-2xl font-bold text-gray-600 mb-2">
-                    {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} View
-                  </div>
-                  <div className="text-gray-500">
-                    {activeTab === 'dashboard' && 'Real-time dashboard with live metrics and charts'}
-                    {activeTab === 'analytics' && 'Advanced analytics and trend analysis'} 
-                    {activeTab === 'network' && 'Network visualization and field relationships'}
-                  </div>
-                  <div className="mt-6 text-gray-400 text-sm">
-                    Coming soon in next update
-                  </div>
+                  <SYNTXNetwork fields={allFields} />
                 </div>
               )}
             </>
