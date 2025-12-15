@@ -30,7 +30,7 @@ interface Field {
   topic: string
   content: string
   style: string
-  quality_score: number
+  score: number
   timestamp: string
   cost_field: number
 }
@@ -81,13 +81,22 @@ export default function SYNTXOS() {
   const loadAllFields = async () => {
     setIsLoading(true)
     try {
-      const res = await fetch('https://dev.syntx-system.com/feld/prompts?limit=40')
+      const res = await fetch('https://dev.syntx-system.com/prompts/complete-export')
       const data = await res.json()
-      const fields = data.prompts || []
+      // Map exports to Field format
+      const fields = (data.exports || []).map((e: any) => ({
+        id: e.id,
+        topic: e.prompt?.topic || 'unknown',
+        content: e.prompt?.text || '',
+        style: e.prompt?.style || 'unknown',
+        score: e.quality?.total_score || 0,
+        timestamp: e.timestamp,
+        cost_field: e.gpt_metadata?.cost?.total_cost || 0
+      }))
       setAllFields(fields)
       
       const avgQuality = fields.length > 0 
-        ? fields.reduce((acc: number, f: Field) => acc + f.quality_score, 0) / fields.length 
+        ? fields.reduce((acc: number, f: Field) => acc + f.score, 0) / fields.length 
         : 0
       const categories = [...new Set(fields.map((f: Field) => getCategory(f.topic)))].length
       const styles = [...new Set(fields.map((f: Field) => f.style))].length

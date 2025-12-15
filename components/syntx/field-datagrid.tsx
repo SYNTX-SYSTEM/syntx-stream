@@ -13,7 +13,7 @@ interface Field {
   topic: string
   content: string
   style: string
-  quality_score: number
+  score: number
   timestamp: string
   cost_field: number
   category?: string
@@ -81,7 +81,7 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
                            field.content.toLowerCase().includes(filter.toLowerCase())
       const matchesCategory = selectedCategory === 'all' || getCategory(field.topic) === selectedCategory
       const matchesStyle = selectedStyle === 'all' || field.style === selectedStyle
-      const matchesQuality = field.quality_score >= qualityRange[0] && field.quality_score <= qualityRange[1]
+      const matchesQuality = field.score >= qualityRange[0] && field.score <= qualityRange[1]
       
       return matchesSearch && matchesCategory && matchesStyle && matchesQuality
     })
@@ -129,8 +129,8 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
   const qualityDistribution = useMemo(() => {
     const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // 1-10
     processedFields.forEach(field => {
-      if (field.quality_score >= 1 && field.quality_score <= 10) {
-        distribution[field.quality_score - 1]++
+      if (field.score >= 1 && field.score <= 10) {
+        distribution[field.score - 1]++
       }
     })
     return distribution
@@ -300,7 +300,7 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
         <div className="flex items-center space-x-6 text-sm text-gray-400">
           <span>Showing {processedFields.length} of {fields.length} fields</span>
           <span>•</span>
-          <span>Avg Quality: {(processedFields.reduce((acc, f) => acc + f.quality_score, 0) / processedFields.length).toFixed(1)}</span>
+          <span>Avg Quality: {(processedFields.reduce((acc, f) => acc + f.score, 0) / processedFields.length).toFixed(1)}</span>
           <span>•</span>
           <span>Styles: {styles.length}</span>
           <span>•</span>
@@ -315,7 +315,7 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
             <tr>
               {[
                 { key: 'topic', label: 'Topic', width: '25%' },
-                { key: 'quality_score', label: 'Quality', width: '10%' },
+                { key: 'score', label: 'Quality', width: '10%' },
                 { key: 'style', label: 'Style', width: '12%' },
                 { key: 'timestamp', label: 'Date', width: '15%' },
                 { key: 'content', label: 'Preview', width: '38%' }
@@ -354,9 +354,9 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
                 </td>
                 
                 <td className="px-4 py-3">
-                  <div className={`inline-flex items-center px-2 py-1 rounded-full border text-xs font-bold ${getQualityColor(field.quality_score)}`}>
+                  <div className={`inline-flex items-center px-2 py-1 rounded-full border text-xs font-bold ${getQualityColor(field.score)}`}>
                     <Star className="w-3 h-3 mr-1" />
-                    {field.quality_score}/10
+                    {field.score}/10
                   </div>
                 </td>
                 
@@ -378,10 +378,10 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
                 
                 <td className="px-4 py-3">
                   <div className="text-sm text-gray-300 line-clamp-2">
-                    {field.content.substring(0, 120)}...
+                    {String(field.content || '').substring(0, 120)}...
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    Cost: {field.cost_field.toFixed(4)}
+                    Cost: {(field.cost_field || 0).toFixed(4)}
                   </div>
                 </td>
               </tr>
@@ -399,9 +399,9 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-2">{selectedField.topic}</h2>
                   <div className="flex items-center space-x-4">
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full border text-sm font-bold ${getQualityColor(selectedField.quality_score)}`}>
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full border text-sm font-bold ${getQualityColor(selectedField.score)}`}>
                       <Star className="w-4 h-4 mr-1" />
-                      Quality: {selectedField.quality_score}/10
+                      Quality: {selectedField.score}/10
                     </div>
                     <div className={`inline-flex items-center px-3 py-1 rounded-full border text-sm capitalize ${getStyleColor(selectedField.style)}`}>
                       Style: {selectedField.style}
