@@ -33,7 +33,7 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedStyle, setSelectedStyle] = useState('all')
   const [qualityRange, setQualityRange] = useState<[number, number]>([0, 10])
-  const [viewMode, setViewMode] = useState<'table' | 'grid' | 'chart'>('table')
+  const [viewMode, setViewMode] = useState<string>('table')
   const [selectedField, setSelectedField] = useState<Field | null>(null)
 
   // Verfügbare Kategorien und Styles
@@ -91,8 +91,8 @@ export function FieldDataGrid({ fields, onFieldSelect }: FieldDataGridProps) {
       const aVal = a[sortConfig.key]
       const bVal = b[sortConfig.key]
       
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
+      if ((aVal ?? 0) < (bVal ?? 0)) return sortConfig.direction === 'asc' ? -1 : 1
+      if ((aVal ?? 0) > (bVal ?? 0)) return sortConfig.direction === 'asc' ? 1 : -1
       return 0
     })
 
