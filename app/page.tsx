@@ -8,7 +8,7 @@ import {
   Activity, Zap, TrendingUp, Database, 
   Network, BarChart3, Filter, Settings,
   Play, Pause, RefreshCw, Download,
-  Heart, Brain, Waves, GitBranch, Search
+  Heart, Brain, Waves, GitBranch, Search, Server
 } from 'lucide-react'
 import { SYNTXVisuals } from '@/components/syntx/syntx-visuals'
 import { SYNTXNetwork } from '@/components/syntx/syntx-network'
@@ -18,7 +18,7 @@ import { HealthHeartbeat, LiveQueueMonitor } from '@/components/syntx/pulse'
 import { SyntxVsNormal } from '@/components/syntx/evolution'
 import { ScorePredictor, MissingFieldsAnalysis, KeywordCombinations } from '@/components/syntx/intelligence'
 import { QueueResonance, DriftMonitor, TopicDistribution } from '@/components/syntx/resonanz'
-import { ScoreDistribution, TrendsChart, WrapperComparison, CostTracker, PerformanceMetrics, SuccessRate } from '@/components/syntx/analytics'
+import { ScoreDistribution, TrendsChart, WrapperComparison, CostTracker, PerformanceMetrics, SuccessRate, CompleteDashboardView, TopicsDeepAnalytics, SuccessByWrapper, GenerationProgress, PromptsTableView, FeldPrompts } from '@/components/syntx/analytics'
 import { QueueStatusCard } from '@/components/syntx/dashboard'
 import { PromptExplorer } from '@/components/syntx/explorer'
 
@@ -146,7 +146,8 @@ export default function SYNTXOS() {
     { id: 'intelligence', label: 'Intelligence', icon: Brain, color: 'orange' },
     { id: 'resonanz', label: 'Resonanz', icon: Waves, color: 'pink' },
     { id: 'network', label: 'Network', icon: Network, color: 'indigo' },
-    { id: 'explorer', label: 'Explorer', icon: Search, color: 'cyan' }
+    { id: 'explorer', label: 'Explorer', icon: Search, color: 'cyan' },
+    { id: 'system', label: 'System', icon: Server, color: 'emerald' }
   ]
 
   return (
@@ -384,6 +385,26 @@ export default function SYNTXOS() {
                 <p className="text-gray-400">Complete Prompt & Response Database • 686 Entries</p>
               </div>
               <PromptExplorer />
+            </div>
+          )}
+
+          {/* SYSTEM Tab - ALL REMAINING ENDPOINTS */}
+          {activeTab === 'system' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent mb-2">SYNTX SYSTEM</h2>
+                <p className="text-gray-400">Complete API Coverage • All Endpoints</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CompleteDashboardView />
+                <SuccessByWrapper />
+              </div>
+              <TopicsDeepAnalytics />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <GenerationProgress />
+                <FeldPrompts />
+              </div>
+              <PromptsTableView />
             </div>
           )}
         </div>
