@@ -105,7 +105,7 @@ export function StromTab() {
   );
 }
 
-import { LiveQueueOverview } from '@/components/krontun/LiveQueueOverview';
+import LiveQueueOverview from '@/components/krontun/LiveQueueOverview';
 
 // Füge in den Tab ein:
 // <LiveQueueOverview />
