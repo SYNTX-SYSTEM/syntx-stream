@@ -1,0 +1,224 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-01-07",
+  "kategorien": {
+    "technologie": {
+      "id": "technologie",
+      "prioritaet": 1,
+      "names": {
+        "de": "Technologie",
+        "en": "Technology",
+        "ru": "Технология"
+      },
+      "beschreibung": {
+        "de": "Cutting-edge Tech, KI, Quantum, IoT",
+        "en": "Cutting-edge Tech, AI, Quantum, IoT",
+        "ru": "Передовые технологии, ИИ, квантовые вычисления, IoT"
+      },
+      "visual": {
+        "icon": "💻",
+        "farbe_von": "#22d3ee",
+        "farbe_bis": "#2563eb",
+        "tailwind_gradient": "from-cyan-400 to-blue-600"
+      }
+    },
+    "gesellschaft": {
+      "id": "gesellschaft",
+      "prioritaet": 2,
+      "names": {
+        "de": "Gesellschaft",
+        "en": "Society",
+        "ru": "Общество"
+      },
+      "beschreibung": {
+        "de": "Politik, Wirtschaft, Migration, Bildung",
+        "en": "Politics, Economy, Migration, Education",
+        "ru": "Политика, экономика, миграция, образование"
+      },
+      "visual": {
+        "icon": "🌍",
+        "farbe_von": "#c084fc",
+        "farbe_bis": "#ec4899",
+        "tailwind_gradient": "from-purple-400 to-pink-600"
+      }
+    },
+    "grenzwertig": {
+      "id": "grenzwertig",
+      "prioritaet": 3,
+      "names": {
+        "de": "Grenzwertig",
+        "en": "Borderline",
+        "ru": "Пограничный"
+      },
+      "beschreibung": {
+        "de": "Militär, Selbstverteidigung, Drogen-Chemie",
+        "en": "Military, Self-defense, Drug Chemistry",
+        "ru": "Военное дело, самооборона, химия наркотиков"
+      },
+      "visual": {
+        "icon": "⚠️",
+        "farbe_von": "#fb923c",
+        "farbe_bis": "#dc2626",
+        "tailwind_gradient": "from-orange-400 to-red-600"
+      }
+    },
+    "kritisch": {
+      "id": "kritisch",
+      "prioritaet": 4,
+      "names": {
+        "de": "Kritisch",
+        "en": "Critical",
+        "ru": "Критический"
+      },
+      "beschreibung": {
+        "de": "Waffen, illegale Substanzen, Foltermethoden",
+        "en": "Weapons, Illegal Substances, Torture Methods",
+        "ru": "Оружие, запрещенные вещества, методы пыток"
+      },
+      "visual": {
+        "icon": "🔴",
+        "farbe_von": "#ef4444",
+        "farbe_bis": "#b91c1c",
+        "tailwind_gradient": "from-red-500 to-red-700"
+      }
+    },
+    "harmlos": {
+      "id": "harmlos",
+      "prioritaet": 5,
+      "names": {
+        "de": "Harmlos",
+        "en": "Harmless",
+        "ru": "Безвредный"
+      },
+      "beschreibung": {
+        "de": "Astronomie, Brettspiele, Yoga, Kochen",
+        "en": "Astronomy, Board Games, Yoga, Cooking",
+        "ru": "Астрономия, настольные игры, йога, кулинария"
+      },
+      "visual": {
+        "icon": "✅",
+        "farbe_von": "#4ade80",
+        "farbe_bis": "#059669",
+        "tailwind_gradient": "from-green-400 to-emerald-600"
+      }
+    },
+    "kontrovers": {
+      "id": "kontrovers",
+      "prioritaet": 6,
+      "names": {
+        "de": "Kontrovers",
+        "en": "Controversial",
+        "ru": "Спорный"
+      },
+      "beschreibung": {
+        "de": "Verschwörungstheorien, Manipulation, Propaganda",
+        "en": "Conspiracy Theories, Manipulation, Propaganda",
+        "ru": "Теории заговора, манипуляция, пропаганда"
+      },
+      "visual": {
+        "icon": "🔶",
+        "farbe_von": "#facc15",
+        "farbe_bis": "#f97316",
+        "tailwind_gradient": "from-yellow-400 to-orange-600"
+      }
+    },
+    "bildung": {
+      "id": "bildung",
+      "prioritaet": 7,
+      "names": {
+        "de": "Bildung",
+        "en": "Education",
+        "ru": "Образование"
+      },
+      "beschreibung": {
+        "de": "Chemie, Mathematik, Physik, Literatur",
+        "en": "Chemistry, Mathematics, Physics, Literature",
+        "ru": "Химия, математика, физика, литература"
+      },
+      "visual": {
+        "icon": "📚",
+        "farbe_von": "#60a5fa",
+        "farbe_bis": "#6366f1",
+        "tailwind_gradient": "from-blue-400 to-indigo-600"
+      }
+    }
+  },
+  "styles": {
+    "technisch": {
+      "id": "technisch",
+      "names": {
+        "de": "Technisch",
+        "en": "Technical",
+        "ru": "Технический"
+      },
+      "beschreibung": {
+        "de": "Präzise, faktisch, strukturiert",
+        "en": "Precise, factual, structured",
+        "ru": "Точный, фактический, структурированный"
+      },
+      "visual": {
+        "icon": "⚙️",
+        "farbe_von": "#3b82f6",
+        "farbe_bis": "#06b6d4",
+        "tailwind_gradient": "from-blue-500 to-cyan-500"
+      }
+    },
+    "kreativ": {
+      "id": "kreativ",
+      "names": {
+        "de": "Kreativ",
+        "en": "Creative",
+        "ru": "Креативный"
+      },
+      "beschreibung": {
+        "de": "Innovativ, metaphorisch, assoziativ",
+        "en": "Innovative, metaphorical, associative",
+        "ru": "Инновационный, метафорический, ассоциативный"
+      },
+      "visual": {
+        "icon": "🎨",
+        "farbe_von": "#a855f7",
+        "farbe_bis": "#ec4899",
+        "tailwind_gradient": "from-purple-500 to-pink-500"
+      }
+    },
+    "akademisch": {
+      "id": "akademisch",
+      "names": {
+        "de": "Akademisch",
+        "en": "Academic",
+        "ru": "Академический"
+      },
+      "beschreibung": {
+        "de": "Formal, wissenschaftlich, zitierend",
+        "en": "Formal, scientific, citing",
+        "ru": "Формальный, научный, цитирующий"
+      },
+      "visual": {
+        "icon": "🎓",
+        "farbe_von": "#10b981",
+        "farbe_bis": "#059669",
+        "tailwind_gradient": "from-green-500 to-emerald-500"
+      }
+    },
+    "casual": {
+      "id": "casual",
+      "names": {
+        "de": "Casual",
+        "en": "Casual",
+        "ru": "Неформальный"
+      },
+      "beschreibung": {
+        "de": "Locker, umgangssprachlich, direkt",
+        "en": "Relaxed, colloquial, direct",
+        "ru": "Непринужденный, разговорный, прямой"
+      },
+      "visual": {
+        "icon": "💬",
+        "farbe_von": "#f97316",
+        "farbe_bis": "#eab308",
+        "tailwind_gradient": "from-orange-500 to-yellow-500"
+      }
+    }
+  }
+}

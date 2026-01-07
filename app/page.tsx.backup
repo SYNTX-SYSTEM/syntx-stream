@@ -1,32 +1,27 @@
 // app/page.tsx - SYNTX COMPLETE SYSTEM DASHBOARD
-// MODULAR • CLEAN • SYNTX STYLE
 'use client'
 
 import { useState, useEffect } from 'react'
+import { FieldDataGrid } from '@/components/syntx/field-datagrid'
+import { QueueDashboard } from '@/components/syntx/queue-dashboard'
 import { 
   Activity, Zap, TrendingUp, Database, 
   Network, BarChart3, Filter, Settings,
   Play, Pause, RefreshCw, Download,
   Heart, Brain, Waves, GitBranch, Search, Server
 } from 'lucide-react'
+import { SYNTXVisuals } from '@/components/syntx/syntx-visuals'
+import { SYNTXNetwork } from '@/components/syntx/syntx-network'
 import { CyberLogo } from '@/components/syntx/cyber-logo'
 import { AuthGate } from '@/components/syntx/syntx-auth-gate'
+import { HealthHeartbeat, LiveQueueMonitor } from '@/components/syntx/pulse'
+import { SyntxVsNormal } from '@/components/syntx/evolution'
+import { ScorePredictor, MissingFieldsAnalysis, KeywordCombinations } from '@/components/syntx/intelligence'
+import { QueueResonance, DriftMonitor, TopicDistribution } from '@/components/syntx/resonanz'
+import { ScoreDistribution, TrendsChart, WrapperComparison, CostTracker, PerformanceMetrics, SuccessRate, CompleteDashboardView, TopicsDeepAnalytics, SuccessByWrapper, GenerationProgress, PromptsTableView, FeldPrompts } from '@/components/syntx/analytics'
+import { QueueStatusCard } from '@/components/syntx/dashboard'
+import { PromptExplorer } from '@/components/syntx/explorer'
 import { MatrixRain, ParticleField, CursorTrail, GlitchText } from '@/components/syntx/effects'
-
-// 🌊 MODULAR TAB IMPORTS
-import {
-  PulseTab,
-  StromTab,
-  DashboardTab,
-  DataGridTab,
-  AnalyticsTab,
-  EvolutionTab,
-  IntelligenceTab,
-  ResonanzTab,
-  NetworkTab,
-  ExplorerTab,
-  SystemTab
-} from '@/components/syntx/tabs'
 
 const SYNTX_MODES = ['TRUE_RAW', 'CYBERDARK', 'SIGMA', 'FIELD_HYGIENE'] as const
 
@@ -88,6 +83,7 @@ export default function SYNTXOS() {
     try {
       const res = await fetch('https://dev.syntx-system.com/prompts/complete-export')
       const data = await res.json()
+      // Map exports to Field format
       const fields = (data.exports || []).map((e: any) => ({
         id: e.id,
         topic: e.prompt?.topic || 'unknown',
@@ -150,10 +146,9 @@ export default function SYNTXOS() {
     URL.revokeObjectURL(url)
   }
 
-  // 🌊 TAB DEFINITIONS - CLEAN
+  // TAB DEFINITIONS - ERWEITERT
   const TABS = [
     { id: 'pulse', label: 'Pulse', icon: Heart, color: 'red' },
-    { id: 'strom', label: 'Strom', icon: Zap, color: 'cyan' },
     { id: 'dashboard', label: 'Dashboard', icon: Activity, color: 'blue' },
     { id: 'datagrid', label: 'DataGrid', icon: Database, color: 'cyan' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, color: 'purple' },
@@ -220,7 +215,7 @@ export default function SYNTXOS() {
 
       {/* MAIN INTERFACE */}
       <div className="max-w-8xl mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
-        {/* Tab Navigation */}
+        {/* Tab Navigation - ERWEITERT */}
         <div className="flex border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900 overflow-x-auto">
           {TABS.map(({ id, label, icon: Icon, color }) => (
             <button
@@ -261,19 +256,173 @@ export default function SYNTXOS() {
           </div>
         </div>
 
-        {/* 🌊 TAB CONTENT - MODULAR & CLEAN */}
+        {/* Tab Content */}
         <div className="p-6">
-          {activeTab === 'pulse' && <PulseTab />}
-          {activeTab === 'strom' && <StromTab />}
-          {activeTab === 'dashboard' && <DashboardTab stats={stats} health={health} />}
-          {activeTab === 'datagrid' && <DataGridTab fields={allFields} isLoading={isLoading} onFieldSelect={setSelectedField} />}
-          {activeTab === 'analytics' && <AnalyticsTab />}
-          {activeTab === 'evolution' && <EvolutionTab />}
-          {activeTab === 'intelligence' && <IntelligenceTab />}
-          {activeTab === 'resonanz' && <ResonanzTab />}
-          {activeTab === 'network' && <NetworkTab />}
-          {activeTab === 'explorer' && <ExplorerTab />}
-          {activeTab === 'system' && <SystemTab />}
+          {/* PULSE TAB - NEU */}
+          {activeTab === 'pulse' && (
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-2">SYNTX PULSE</h2>
+                <p className="text-gray-400">System Heartbeat & Live Queue Monitor</p>
+              </div>
+              <HealthHeartbeat />
+              <LiveQueueMonitor />
+            </div>
+          )}
+
+          {/* DASHBOARD TAB */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">SYNTX Live Dashboard</h2>
+                <p className="text-gray-400">Real-time queue monitoring and system health</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <QueueStatusCard />
+              </div>
+              <QueueDashboard />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                  <div className="text-cyan-400 text-sm font-medium mb-2">Total Fields</div>
+                  <div className="text-3xl font-bold text-white">{stats.totalFields}</div>
+                </div>
+                <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                  <div className="text-green-400 text-sm font-medium mb-2">Avg Quality</div>
+                  <div className="text-3xl font-bold text-white">{stats.avgQuality.toFixed(1)}</div>
+                </div>
+                <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                  <div className="text-purple-400 text-sm font-medium mb-2">System Health</div>
+                  <div className={`text-3xl font-bold ${health?.status?.includes('ONLINE') || health?.status?.includes('FLIESST') ? 'text-green-400' : 'text-red-400'}`}>
+                    {health?.status || 'CHECKING'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* DATAGRID Tab */}
+          {activeTab === 'datagrid' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">Field DataGrid</h2>
+                <p className="text-gray-400">Complete overview of all {allFields.length} fields</p>
+              </div>
+              {isLoading ? (
+                <div className="text-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <div className="text-gray-400">Loading...</div>
+                </div>
+              ) : (
+                <FieldDataGrid fields={allFields} onFieldSelect={setSelectedField} />
+              )}
+            </div>
+          )}
+
+          {/* ANALYTICS Tab */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">SYNTX Analytics</h2>
+                <p className="text-gray-400">Real-time field resonance visualization</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <ScoreDistribution />
+                <TrendsChart />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <WrapperComparison />
+                <CostTracker />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <PerformanceMetrics />
+                <SuccessRate />
+              </div>
+              <SYNTXVisuals />
+            </div>
+          )}
+
+          {/* EVOLUTION Tab - PLACEHOLDER */}
+          {activeTab === 'evolution' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2">SYNTX EVOLUTION</h2>
+                <p className="text-gray-400">SYNTX vs Normal - The Proof</p>
+              </div>
+              <SyntxVsNormal />
+            </div>
+          )}
+
+          {/* INTELLIGENCE Tab - PLACEHOLDER */}
+          {activeTab === 'intelligence' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent mb-2">SYNTX INTELLIGENCE</h2>
+                <p className="text-gray-400">Advanced Analytics & Predictions</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ScorePredictor />
+                <KeywordCombinations />
+              </div>
+              <MissingFieldsAnalysis />
+            </div>
+          )}
+
+          {/* RESONANZ Tab - PLACEHOLDER */}
+          {activeTab === 'resonanz' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent mb-2">SYNTX RESONANZ</h2>
+                <p className="text-gray-400">Field Analysis & Drift Monitor</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <QueueResonance />
+                <TopicDistribution />
+              </div>
+              <DriftMonitor />
+            </div>
+          )}
+
+          {/* NETWORK Tab */}
+          {activeTab === 'network' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">SYNTX Network Matrix</h2>
+                <p className="text-gray-400">Interactive field resonance visualization</p>
+              </div>
+              <SYNTXNetwork />
+            </div>
+          )}
+
+          {/* EXPLORER Tab - THE ULTIMATE PROMPT BROWSER */}
+          {activeTab === 'explorer' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">SYNTX EXPLORER</h2>
+                <p className="text-gray-400">Complete Prompt & Response Database • 686 Entries</p>
+              </div>
+              <PromptExplorer />
+            </div>
+          )}
+
+          {/* SYSTEM Tab - ALL REMAINING ENDPOINTS */}
+          {activeTab === 'system' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent mb-2">SYNTX SYSTEM</h2>
+                <p className="text-gray-400">Complete API Coverage • All Endpoints</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CompleteDashboardView />
+                <SuccessByWrapper />
+              </div>
+              <TopicsDeepAnalytics />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <GenerationProgress />
+                <FeldPrompts />
+              </div>
+              <PromptsTableView />
+            </div>
+          )}
         </div>
       </div>
 

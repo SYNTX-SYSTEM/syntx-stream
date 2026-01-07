@@ -1,75 +1,187 @@
-// lib/syntx-api.ts - SYNTX Felder API Client mit korrekten Endpoints
-const API_BASE = 'https://dev.syntx-system.com'
+/**
+ * 🌊 SYNTX API CLIENT
+ * TypeScript Client für Strom-Orchestrator API
+ */
 
-export interface PromptField {
-  id: string
-  topic: string
-  content: string
-  style: string
-  quality_score: number
-  timestamp: string
-  cost_field: number
+const API_BASE = process.env.NEXT_PUBLIC_SYNTX_API || 'https://dev.syntx-system.com/api/strom';
+
+export interface FeldGewichtung {
+  [topic: string]: number;
 }
 
-export interface TemporalAnalytics {
-  time_span: {
-    earliest: string
-    latest: string
-    total_days: number
-  }
-  generation_flow: {
-    total_felder: number
-    by_day: Record<string, number>
-    avg_per_day: number
-  }
+export interface StromParameter {
+  felder_topics: FeldGewichtung;
+  felder_styles: FeldGewichtung;
+  strom_anzahl: number;
+  sprache: string;
 }
 
-export interface HealthStatus {
-  status: string
-  feld_count: number
-  api_version: string
-  timestamp: string
+export interface StromErgebnis {
+  erfolg: boolean;
+  topic: string;
+  style: string;
+  sprache: string;
+  strom_text: string | null;
+  qualitaet: number | null;
+  kosten: number | null;
+  dauer_ms: number;
 }
 
-export class SYNTXAPI {
-  static async checkHealth(): Promise<HealthStatus> {
-    const response = await fetch(`${API_BASE}/strom/health`)
-    return await response.json()
-  }
+export interface SystemStatus {
+  status: string;
+  felder_verfuegbar: {
+    topics: number;
+    kategorien: number;
+    styles: number;
+  };
+  model: string;
+  max_stroeme_pro_anfrage: number;
+}
 
-  static async getTemporalAnalytics(): Promise<{ temporal_analytics: TemporalAnalytics }> {
-    const response = await fetch(`${API_BASE}/strom/analytics/temporal`)
-    return await response.json()
+export class SyntxAPI {
+  
+  static async getStatus(): Promise<SystemStatus> {
+    const res = await fetch(`${API_BASE}/strom/status`);
+    if (!res.ok) throw new Error('Failed to fetch status');
+    return res.json();
   }
-
-  static async getPrompts(limit: number = 5): Promise<{ prompts: PromptField[] }> {
-    const response = await fetch(`${API_BASE}/strom/prompts?limit=${limit}`)
-    return await response.json()
+  
+  static async getVerfuegbareFelder() {
+    const res = await fetch(`${API_BASE}/felder/verfuegbar`);
+    if (!res.ok) throw new Error('Failed to fetch felder');
+    return res.json();
   }
-
+  
   static async getTopics() {
-    const response = await fetch(`${API_BASE}/strom/topics`)
-    return await response.json()
+    const res = await fetch(`${API_BASE}/kalibrierung/topics`);
+    if (!res.ok) throw new Error('Failed to fetch topics');
+    return res.json();
+  }
+  
+  static async updateTopics(kategorie: string, topics: string[], aktion: 'set' | 'add' | 'remove') {
+    const res = await fetch(`${API_BASE}/kalibrierung/topics`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kategorie, topics, aktion })
+    });
+    if (!res.ok) throw new Error('Failed to update topics');
+    return res.json();
+  }
+  
+  static async getStyles() {
+    const res = await fetch(`${API_BASE}/kalibrierung/styles`);
+    if (!res.ok) throw new Error('Failed to fetch styles');
+    return res.json();
+  }
+  
+  static async updateStyles(styles: string[], aktion: 'set' | 'add' | 'remove') {
+    const res = await fetch(`${API_BASE}/kalibrierung/styles`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ styles, aktion })
+    });
+    if (!res.ok) throw new Error('Failed to update styles');
+    return res.json();
+  }
+  
+  static async getOpenAIConfig() {
+    const res = await fetch(`${API_BASE}/kalibrierung/openai`);
+    if (!res.ok) throw new Error('Failed to fetch OpenAI config');
+    return res.json();
+  }
+  
+  static async updateOpenAIConfig(config: {
+    model: string;
+    temperature: number;
+    top_p: number;
+    max_tokens: number;
+    max_refusal_retries: number;
+  }) {
+    const res = await fetch(`${API_BASE}/kalibrierung/openai`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+    if (!res.ok) throw new Error('Failed to update OpenAI config');
+    return res.json();
+  }
+  
+  static async getCronJobs() {
+    const res = await fetch(`${API_BASE}/kalibrierung/cron`);
+    if (!res.ok) throw new Error('Failed to fetch cron jobs');
+    return res.json();
+  }
+  
+  static async addCronJob(job: {
+    name: string;
+    rhythmus: string;
+    wrapper?: string;
+    batch_groesse?: number;
+    typ: 'producer' | 'consumer';
+  }) {
+    const res = await fetch(`${API_BASE}/kalibrierung/cron`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job)
+    });
+    if (!res.ok) throw new Error('Failed to add cron job');
+    return res.json();
+  }
+  
+  static async deleteCronJob(pattern: string) {
+    const res = await fetch(`${API_BASE}/kalibrierung/cron/${pattern}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error('Failed to delete cron job');
+    return res.json();
+  }
+  
+  static async getResonanzParameter() {
+    const res = await fetch(`${API_BASE}/resonanz/parameter`);
+    if (!res.ok) throw new Error('Failed to fetch resonanz parameter');
+    return res.json();
+  }
+  
+  static async dispatchStrom(params: StromParameter) {
+    const res = await fetch(`${API_BASE}/strom/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Failed to dispatch strom');
+    return res.json();
   }
 
-  static async getTemporalPrompts(startDate?: string, endDate?: string, limit: number = 5): Promise<{ prompts: PromptField[] }> {
-    let url = `${API_BASE}/strom/prompts/temporal?limit=${limit}`
-    if (startDate) url += `&start_date=${startDate}`
-    if (endDate) url += `&end_date=${endDate}`
-    
-    const response = await fetch(url)
-    return await response.json()
+  // 🌊 TOPIC WEIGHTS
+  static async getTopicWeights() {
+    const res = await fetch(`${API_BASE}/topic-weights`);
+    if (!res.ok) throw new Error('Failed to fetch topic weights');
+    return res.json();
   }
-
-  // Neuer Stream-Endpoint Simulation - Polling basierend
-  static async getLiveStream(limit: number = 3): Promise<PromptField[]> {
-    try {
-      // Hol die neuesten Felder
-      const response = await this.getPrompts(limit)
-      return response.prompts || []
-    } catch (error) {
-      console.error('Stream error:', error)
-      return []
-    }
+  
+  static async saveTopicWeights(weights: Record<string, number>) {
+    const res = await fetch(`${API_BASE}/topic-weights`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weights })
+    });
+    if (!res.ok) throw new Error('Failed to save topic weights');
+    return res.json();
+  }
+  
+  static async getTopicWeight(topicName: string) {
+    const res = await fetch(`${API_BASE}/topic-weights/${encodeURIComponent(topicName)}`);
+    if (!res.ok) throw new Error('Failed to fetch topic weight');
+    return res.json();
+  }
+  
+  static async updateTopicWeight(topicName: string, weight: number) {
+    const res = await fetch(`${API_BASE}/topic-weights/${encodeURIComponent(topicName)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weight })
+    });
+    if (!res.ok) throw new Error('Failed to update topic weight');
+    return res.json();
   }
 }
