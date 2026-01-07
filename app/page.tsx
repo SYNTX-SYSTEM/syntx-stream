@@ -27,7 +27,8 @@ import {
   ExplorerTab,
   SystemTab
 } from '@/components/syntx/tabs'
-
+import LiveQueueOverview from '@/components/krontun/LiveQueueOverview'
+import CronPayloadInspector from '@/components/krontun/CronPayloadInspector'
 const SYNTX_MODES = ['TRUE_RAW', 'CYBERDARK', 'SIGMA', 'FIELD_HYGIENE'] as const
 
 interface Field {
@@ -153,7 +154,8 @@ export default function SYNTXOS() {
   // 🌊 TAB DEFINITIONS - CLEAN
   const TABS = [
     { id: 'pulse', label: 'Pulse', icon: Heart, color: 'red' },
-    { id: 'strom', label: 'Strom', icon: Zap, color: 'cyan' },
+    { id: 'strom', label: 'Topic', icon: Zap, color: 'cyan' },
+    { id: 'krontun', label: 'KRONTUN', icon: Activity, color: 'cyan' },
     { id: 'dashboard', label: 'Dashboard', icon: Activity, color: 'blue' },
     { id: 'datagrid', label: 'DataGrid', icon: Database, color: 'cyan' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, color: 'purple' },
@@ -264,8 +266,14 @@ export default function SYNTXOS() {
         {/* 🌊 TAB CONTENT - MODULAR & CLEAN */}
         <div className="p-6">
           {activeTab === 'pulse' && <PulseTab />}
-          {activeTab === 'strom' && <StromTab />}
-          {activeTab === 'dashboard' && <DashboardTab stats={stats} health={health} />}
+          {activeTab === 'strom' && <StromTab />}i
+	  {activeTab === 'krontun' && (
+        	<div className="space-y-8">
+              		<LiveQueueOverview />
+              		<CronPayloadInspector />
+            	</div>
+          )}  
+	  {activeTab === 'dashboard' && <DashboardTab stats={stats} health={health} />}
           {activeTab === 'datagrid' && <DataGridTab fields={allFields} isLoading={isLoading} onFieldSelect={setSelectedField} />}
           {activeTab === 'analytics' && <AnalyticsTab />}
           {activeTab === 'evolution' && <EvolutionTab />}
