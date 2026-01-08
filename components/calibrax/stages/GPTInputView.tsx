@@ -31,6 +31,7 @@ export function GPTInputView({ run, onCopy, copied }: GPTInputViewProps) {
     <div className="space-y-4">
       {/* Neural Generation Strategy */}
       <div className="relative border-2 border-cyan-500/30 rounded-2xl p-6 bg-gradient-to-br from-blue-950/30 to-purple-950/30 overflow-hidden">
+  console.log("🔥 DEBUG gpt_user_prompt:", run.stages?.gpt_user_prompt);
         {/* Neural connections background */}
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full">
@@ -226,23 +227,7 @@ export function GPTInputView({ run, onCopy, copied }: GPTInputViewProps) {
           
           <div className="text-xs text-cyan-400 font-mono mb-3 mt-4">USER PROMPT:</div>
           <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
-            {`Basierend auf erfolgreichen Prompt-Patterns (Avg Score: 100.0/100, Field Completeness: 100.0%):
-
-**ERFOLGREICHE PATTERNS:**
-- Top-performende Categories: bildung, harmlos, gesellschaft
-- Top-performende Styles: kreativ, akademisch, casual
-- Beste Field Detection Rate: 100.0%
-
-**DEINE AUFGABE:**
-Erstelle einen Meta-Prompt zum Thema: "${run.cron_data.name}"
-
-**OPTIMIERUNGS-KRITERIEN:**
-1. Verwende Ansätze die in erfolgreichen Prompts funktioniert haben
-2. Ziele auf 100% Field Completeness (alle SYNTX-Felder auslösbar)
-3. Struktur klar und kohärent (>95% Structure Adherence)
-4. Stil konsistent beibehalten
-
-Der Prompt sollte ein Llama-Modell durch SYNTX-Wrapper zur semantischen Feldextraktion anregen können.`}
+            {run.stages?.gpt_user_prompt && run.stages.gpt_user_prompt.trim() !== "" ? run.stages.gpt_user_prompt : (run.cron_data.name || "No prompt data available")}
           </pre>
         </div>
       </DataCard>
