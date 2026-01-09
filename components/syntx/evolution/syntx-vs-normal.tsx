@@ -21,7 +21,7 @@ export function SyntxVsNormal() {
   const [scanLine, setScanLine] = useState(0)
 
   useEffect(() => {
-    fetch('https://dev.syntx-system.com/evolution/syntx-vs-normal')
+    fetch('https://dev.syntx-system.com/api/strom/evolution/syntx-vs-normal')
       .then(res => res.json())
       .then(setData)
       .catch(console.error)
