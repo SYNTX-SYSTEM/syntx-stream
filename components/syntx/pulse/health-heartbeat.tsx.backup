@@ -37,9 +37,9 @@ export function HealthHeartbeat() {
   const fetchAll = async () => {
     try {
       const [healthRes, stromRes, resonanzRes] = await Promise.all([
-        fetch('https://dev.syntx-system.com/api/strom/health'),
-        fetch('https://dev.syntx-system.com/api/strom/health'),
-        fetch('https://dev.syntx-system.com/api/strom/resonanz/system')
+        fetch('https://dev.syntx-system.com/health'),
+        fetch('https://dev.syntx-system.com/strom/health'),
+        fetch('https://dev.syntx-system.com/resonanz/system')
       ])
       setHealth(await healthRes.json())
       setStrom(await stromRes.json())

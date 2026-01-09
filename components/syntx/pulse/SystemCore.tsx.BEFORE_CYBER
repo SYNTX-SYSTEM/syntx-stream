@@ -1,0 +1,62 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Activity } from 'lucide-react';
+
+interface SystemCoreProps {
+  system_zustand: string;
+  queue_incoming: number;
+  status: string;
+}
+
+export function SystemCore({ system_zustand, queue_incoming, status }: SystemCoreProps) {
+  const isCritical = system_zustand === 'KRITISCH';
+  const pulseDuration = Math.max(1, 3 - (queue_incoming * 0.02));
+  const glowIntensity = Math.min(40, 10 + (queue_incoming * 0.3));
+  
+  return (
+    <div className="flex items-center justify-center">
+      <div className="relative">
+        <motion.div
+          className={`relative w-64 h-64 rounded-full border-4 ${
+            isCritical ? 'border-red-500' : 'border-cyan-500'
+          } bg-black/80 backdrop-blur-xl flex items-center justify-center`}
+          animate={{
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: pulseDuration,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          style={{
+            boxShadow: `0 0 ${glowIntensity}px ${isCritical ? 'rgba(239, 68, 68, 0.6)' : 'rgba(6, 182, 212, 0.6)'}`
+          }}
+        >
+          <div className="text-center">
+            <Activity className={`w-16 h-16 mx-auto mb-4 ${isCritical ? 'text-red-500' : 'text-cyan-400'}`} />
+            <div className={`text-2xl font-bold ${isCritical ? 'text-red-400' : 'text-cyan-400'}`}>
+              {system_zustand}
+            </div>
+            <div className="text-sm text-gray-400 mt-2">{status}</div>
+          </div>
+        </motion.div>
+        
+        <motion.div
+          className={`absolute inset-0 rounded-full ${
+            isCritical ? 'bg-red-500/20' : 'bg-cyan-500/20'
+          } blur-2xl`}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3]
+          }}
+          transition={{
+            duration: pulseDuration,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+        />
+      </div>
+    </div>
+  );
+}

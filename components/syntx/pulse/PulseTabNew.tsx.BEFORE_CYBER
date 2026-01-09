@@ -1,0 +1,134 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SystemCore } from './SystemCore';
+import { ResonanzCard } from './ResonanzCard';
+import { QueueTower } from './QueueTower';
+import { RecentJobs } from './RecentJobs';
+import { Activity, Zap, TrendingUp } from 'lucide-react';
+
+export function PulseTabNew() {
+  const [health, setHealth] = useState<any>(null);
+  const [resonanz, setResonanz] = useState<any>(null);
+  const [queue, setQueue] = useState<any>(null);
+  const [showDriftFlash, setShowDriftFlash] = useState(false);
+  
+  const fetchData = async () => {
+    try {
+      const [healthRes, resonanzRes, queueRes] = await Promise.all([
+        fetch('https://dev.syntx-system.com/api/strom/health'),
+        fetch('https://dev.syntx-system.com/api/strom/resonanz/system'),
+        fetch('https://dev.syntx-system.com/api/strom/monitoring/live-queue')
+      ]);
+      
+      const healthData = await healthRes.json();
+      const resonanzData = await resonanzRes.json();
+      const queueData = await queueRes.json();
+      
+      setHealth(healthData);
+      setResonanz(resonanzData);
+      setQueue(queueData);
+      
+      const hasDrift = resonanzData?.resonanz_felder && 
+        Object.values(resonanzData.resonanz_felder).some((f: any) => f.resonanz === 'DRIFT');
+      
+      if (hasDrift && !showDriftFlash) {
+        setShowDriftFlash(true);
+        setTimeout(() => setShowDriftFlash(false), 200);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+  };
+  
+  useEffect(() => {
+    fetchData();
+    const healthInterval = setInterval(() => fetchData(), 5000);
+    return () => clearInterval(healthInterval);
+  }, []);
+  
+  const isCritical = resonanz?.system_zustand === 'KRITISCH';
+  
+  return (
+    <div className={`relative min-h-screen transition-all duration-500 ${
+      isCritical ? 'bg-black/95' : 'bg-black/85'
+    }`}>
+      <AnimatePresence>
+        {showDriftFlash && (
+          <motion.div
+            className="fixed inset-0 bg-red-500 pointer-events-none z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.15 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
+      
+      <div className="p-8 space-y-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+            SYNTX PULSE
+          </h1>
+          <p className="text-gray-400">System Nervous System Monitor</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-3 flex justify-center">
+            {health && queue && (
+              <SystemCore
+                system_zustand={resonanz?.system_zustand || 'UNKNOWN'}
+                queue_incoming={queue?.queue?.incoming || 0}
+                status={health.status}
+              />
+            )}
+          </div>
+          
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-cyan-400 mb-4">RESONANZ FELDER</h3>
+            {resonanz?.resonanz_felder && (
+              <>
+                <ResonanzCard
+                  title="QUEUE"
+                  value={`${resonanz.resonanz_felder.queue?.incoming || 0} / ${resonanz.resonanz_felder.queue?.processed || 0}`}
+                  resonanz={resonanz.resonanz_felder.queue?.resonanz || 'UNKNOWN'}
+                  icon={<Activity className="w-5 h-5 text-cyan-400" />}
+                />
+                <ResonanzCard
+                  title="QUALITÄT"
+                  value={`${resonanz.resonanz_felder.qualität?.durchschnitt?.toFixed(1) || 0}%`}
+                  resonanz={resonanz.resonanz_felder.qualität?.resonanz || 'UNKNOWN'}
+                  icon={<Zap className="w-5 h-5 text-yellow-400" />}
+                />
+                <ResonanzCard
+                  title="EVOLUTION"
+                  value={`Gen ${resonanz.resonanz_felder.evolution?.generationen || 0}`}
+                  resonanz={resonanz.resonanz_felder.evolution?.resonanz || 'UNKNOWN'}
+                  icon={<TrendingUp className="w-5 h-5 text-purple-400" />}
+                />
+              </>
+            )}
+          </div>
+          
+          <div>
+            {queue?.queue && (
+              <QueueTower
+                incoming={queue.queue.incoming}
+                processing={queue.queue.processing}
+                processed={queue.queue.processed}
+                errors={queue.queue.errors}
+              />
+            )}
+          </div>
+          
+          <div>
+            {queue?.recent_completed && (
+              <RecentJobs jobs={queue.recent_completed} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

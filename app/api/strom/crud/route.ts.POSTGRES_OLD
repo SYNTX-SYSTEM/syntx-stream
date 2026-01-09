@@ -1,0 +1,160 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// GET - List all streams
+export async function GET() {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        strom_id,
+        muster,
+        name,
+        zeitplan,
+        modell,
+        felder_topics,
+        styles,
+        sprachen,
+        aktiv,
+        created_at,
+        updated_at
+      FROM strom_configs
+      ORDER BY created_at DESC
+    `);
+    
+    return NextResponse.json(result.rows);
+  } catch (error) {
+    console.error('GET /api/strom/crud error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch streams' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Create new stream
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json();
+    const { name, zeitplan, modell, felder_topics, styles, sprachen, aktiv = true } = data;
+    
+    // Generate muster (unique key) from name
+    const muster = name.toLowerCase().replace(/\s+/g, '_');
+    
+    const result = await pool.query(`
+      INSERT INTO strom_configs (
+        muster, name, zeitplan, modell, felder_topics, styles, sprachen, aktiv
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `, [muster, name, zeitplan, modell, JSON.stringify(felder_topics), styles, sprachen, aktiv]);
+    
+    return NextResponse.json(result.rows[0], { status: 201 });
+  } catch (error) {
+    console.error('POST /api/strom/crud error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create stream' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update stream
+export async function PUT(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const strom_id = searchParams.get('strom_id');
+    
+    if (!strom_id) {
+      return NextResponse.json(
+        { error: 'strom_id is required' },
+        { status: 400 }
+      );
+    }
+    
+    const data = await request.json();
+    const { name, zeitplan, modell, felder_topics, styles, sprachen, aktiv } = data;
+    
+    // Generate new muster if name changed
+    const muster = name.toLowerCase().replace(/\s+/g, '_');
+    
+    const result = await pool.query(`
+      UPDATE strom_configs
+      SET 
+        muster = $1,
+        name = $2,
+        zeitplan = $3,
+        modell = $4,
+        felder_topics = $5,
+        styles = $6,
+        sprachen = $7,
+        aktiv = $8,
+        updated_at = NOW()
+      WHERE strom_id = $9
+      RETURNING *
+    `, [
+      muster,
+      name,
+      zeitplan,
+      modell,
+      JSON.stringify(felder_topics),
+      styles,
+      sprachen,
+      aktiv,
+      strom_id
+    ]);
+    
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Stream not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(result.rows[0]);
+  } catch (error) {
+    console.error('PUT /api/strom/crud error:', error);
+    return NextResponse.json(
+      { error: 'Failed to update stream' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Delete stream
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const strom_id = searchParams.get('strom_id');
+    
+    if (!strom_id) {
+      return NextResponse.json(
+        { error: 'strom_id is required' },
+        { status: 400 }
+      );
+    }
+    
+    const result = await pool.query(
+      'DELETE FROM strom_configs WHERE strom_id = $1 RETURNING strom_id',
+      [strom_id]
+    );
+    
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Stream not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json({ success: true, strom_id });
+  } catch (error) {
+    console.error('DELETE /api/strom/crud error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete stream' },
+      { status: 500 }
+    );
+  }
+}

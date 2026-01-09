@@ -1,2 +1,6 @@
-export { HealthHeartbeat } from './health-heartbeat'
-export { LiveQueueMonitor } from './live-queue-monitor'
+export { PulseTabNew as PulseTab } from './PulseTabNew';
+export { SystemCore } from './SystemCore';
+export { ResonanzCard } from './ResonanzCard';
+export { QueueTower } from './QueueTower';
+export { RecentJobs } from './RecentJobs';
+export { CyberBackground } from './CyberBackground';

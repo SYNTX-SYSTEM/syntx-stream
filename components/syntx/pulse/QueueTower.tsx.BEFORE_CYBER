@@ -1,0 +1,130 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { ArrowDown, Loader, CheckCircle, AlertTriangle } from 'lucide-react';
+
+interface QueueTowerProps {
+  incoming: number;
+  processing: number;
+  processed: number;
+  errors: number;
+}
+
+export function QueueTower({ incoming, processing, processed, errors }: QueueTowerProps) {
+  const total = incoming + processing + processed + errors;
+  const incomingPercent = total > 0 ? (incoming / total) * 100 : 0;
+  const hasStress = incoming > 50;
+  
+  const scanlineSpeed = hasStress ? 1 : 2;
+  
+  return (
+    <div className="space-y-4">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-cyan-400">LIVE QUEUE TOWER</h3>
+        <p className="text-xs text-gray-500">Real-time Processing Pipeline</p>
+      </div>
+      
+      <div className="relative space-y-3">
+        {hasStress && (
+          <motion.div
+            className="absolute inset-0 bg-cyan-500/5 rounded-lg"
+            animate={{
+              opacity: [0.1, 0.3, 0.1]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity
+            }}
+          />
+        )}
+        
+        <motion.div
+          className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"
+          animate={{
+            top: ['0%', '100%']
+          }}
+          transition={{
+            duration: scanlineSpeed,
+            repeat: Infinity,
+            ease: 'linear'
+          }}
+        />
+        
+        <QueueBar
+          icon={<ArrowDown className="w-5 h-5" />}
+          label="INCOMING"
+          value={incoming}
+          color="cyan"
+          maxValue={100}
+        />
+        
+        <QueueBar
+          icon={<Loader className="w-5 h-5 animate-spin" />}
+          label="PROCESSING"
+          value={processing}
+          color="blue"
+          maxValue={100}
+        />
+        
+        <QueueBar
+          icon={<CheckCircle className="w-5 h-5" />}
+          label="PROCESSED"
+          value={processed}
+          color="green"
+          maxValue={500}
+        />
+        
+        <QueueBar
+          icon={<AlertTriangle className="w-5 h-5" />}
+          label="ERRORS"
+          value={errors}
+          color="red"
+          maxValue={50}
+        />
+      </div>
+    </div>
+  );
+}
+
+function QueueBar({ icon, label, value, color, maxValue }: any) {
+  const colors = {
+    cyan: 'from-cyan-600 to-cyan-400',
+    blue: 'from-blue-600 to-blue-400',
+    green: 'from-green-600 to-green-400',
+    red: 'from-red-600 to-red-400'
+  };
+  
+  const textColors = {
+    cyan: 'text-cyan-400',
+    blue: 'text-blue-400',
+    green: 'text-green-400',
+    red: 'text-red-400'
+  };
+  
+  const percent = Math.min(100, (value / maxValue) * 100);
+  
+  return (
+    <div className="relative bg-black/60 border border-gray-800 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div className={textColors[color as keyof typeof textColors]}>
+            {icon}
+          </div>
+          <span className="text-sm font-bold text-gray-400">{label}</span>
+        </div>
+        <span className={`text-2xl font-black ${textColors[color as keyof typeof textColors]}`}>
+          {value}
+        </span>
+      </div>
+      
+      <div className="relative h-2 bg-gray-900 rounded-full overflow-hidden">
+        <motion.div
+          className={`h-full bg-gradient-to-r ${colors[color as keyof typeof colors]}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${percent}%` }}
+          transition={{ duration: 0.5 }}
+        />
+      </div>
+    </div>
+  );
+}

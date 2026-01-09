@@ -1,0 +1,101 @@
+'use client';
+
+import { motion } from 'framer-motion';
+
+interface ResonanzCardProps {
+  title: string;
+  value: string | number;
+  resonanz: string;
+  icon?: React.ReactNode;
+}
+
+export function ResonanzCard({ title, value, resonanz, icon }: ResonanzCardProps) {
+  const isDrift = resonanz === 'DRIFT';
+  const isActive = resonanz === 'AKTIV';
+  const isCritical = resonanz === 'KRITISCH';
+  
+  const getColors = () => {
+    if (isDrift) return {
+      border: 'border-red-500',
+      bg: 'bg-red-500/10',
+      text: 'text-red-400',
+      glow: 'rgba(239, 68, 68, 0.4)'
+    };
+    if (isCritical) return {
+      border: 'border-orange-500',
+      bg: 'bg-orange-500/10',
+      text: 'text-orange-400',
+      glow: 'rgba(249, 115, 22, 0.4)'
+    };
+    return {
+      border: 'border-cyan-500',
+      bg: 'bg-cyan-500/10',
+      text: 'text-cyan-400',
+      glow: 'rgba(6, 182, 212, 0.4)'
+    };
+  };
+  
+  const colors = getColors();
+  
+  return (
+    <motion.div
+      className={`p-6 rounded-xl border-2 ${colors.border} ${colors.bg} backdrop-blur-sm`}
+      animate={
+        isDrift ? {
+          borderColor: ['#dc2626', '#ef4444', '#dc2626'],
+          scale: [1, 1.02, 1]
+        } : isCritical ? {
+          x: [0, -2, 2, -2, 0],
+        } : {
+          borderColor: ['#06b6d4', '#22d3ee', '#06b6d4'],
+        }
+      }
+      transition={
+        isDrift ? {
+          duration: 3,
+          repeat: Infinity,
+        } : isCritical ? {
+          duration: 0.5,
+          repeat: Infinity,
+          repeatDelay: 2
+        } : {
+          duration: 4,
+          repeat: Infinity,
+        }
+      }
+      style={{
+        boxShadow: `0 0 20px ${colors.glow}`
+      }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{title}</h3>
+        {icon}
+      </div>
+      
+      <div className={`text-3xl font-black ${colors.text} mb-2`}>
+        {value}
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <motion.div 
+          className={`w-2 h-2 rounded-full ${
+            isDrift ? 'bg-red-500' : 
+            isCritical ? 'bg-orange-500' : 
+            'bg-cyan-500'
+          }`}
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [1, 0.5, 1]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity
+          }}
+        />
+        <span className={`text-xs font-bold ${colors.text}`}>
+          {resonanz}
+        </span>
+      </div>
+    </motion.div>
+  );
+}

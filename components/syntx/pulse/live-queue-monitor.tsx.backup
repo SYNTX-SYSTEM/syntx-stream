@@ -22,7 +22,7 @@ export function LiveQueueMonitor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('https://dev.syntx-system.com/api/strom/monitoring/live-queue')
+        const res = await fetch('https://dev.syntx-system.com/monitoring/live-queue')
         setData(await res.json())
       } catch (err) { console.error(err) }
       finally { setLoading(false) }
