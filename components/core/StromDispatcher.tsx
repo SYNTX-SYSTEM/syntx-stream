@@ -24,7 +24,7 @@ export function StromDispatcher() {
           'technisch': 1.0 
         },
         strom_anzahl: 3,
-        sprache: 'de'
+        sprachen: ['de']
       });
       
       setResult(res);

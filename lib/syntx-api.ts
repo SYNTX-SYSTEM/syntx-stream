@@ -1,33 +1,17 @@
 const API_BASE = process.env.NEXT_PUBLIC_SYNTX_API || 'https://dev.syntx-system.com/api/strom';
 
-export interface FeldGewichtung {
-  [topic: string]: number;
-}
-
 export interface StromParameter {
-  felder_topics: FeldGewichtung;
-  styles: string[];
-  sprachen: string[];
+  felder_topics: Record<string, number>;
+  felder_styles?: Record<string, number>;
+  styles?: string[];
+  sprachen?: string[];
+  strom_anzahl?: number;
   anzahl?: number;
   modell?: string;
 }
 
 export class SyntxAPI {
-  // ✅ HEALTH
-  static async getStatus() {
-    const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) throw new Error('Failed to fetch status');
-    return res.json();
-  }
-
-  // ✅ FELD - Topics (FIXED: /feld/topics instead of /kalibrierung/topics)
-  static async getTopics() {
-    const res = await fetch(`${API_BASE}/feld/topics`);
-    if (!res.ok) throw new Error('Failed to fetch topics');
-    return res.json();
-  }
-
-  // ✅ TOPIC WEIGHTS
+  // Topic Weights
   static async getTopicWeights() {
     const res = await fetch(`${API_BASE}/topic-weights`);
     if (!res.ok) throw new Error('Failed to fetch topic weights');
@@ -38,7 +22,7 @@ export class SyntxAPI {
     const res = await fetch(`${API_BASE}/topic-weights`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(weights)
+      body: JSON.stringify({ weights })
     });
     if (!res.ok) throw new Error('Failed to save topic weights');
     return res.json();
@@ -60,9 +44,16 @@ export class SyntxAPI {
     return res.json();
   }
 
-  // ✅ STROM DISPATCH
+  // Topics
+  static async getTopics() {
+    const res = await fetch(`${API_BASE}/feld/topics`);
+    if (!res.ok) throw new Error('Failed to fetch topics');
+    return res.json();
+  }
+
+  // Strom Dispatch
   static async dispatchStrom(params: StromParameter) {
-    const res = await fetch(`${API_BASE}/strom/dispatch`, {
+    const res = await fetch(`${API_BASE}/dispatch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params)
@@ -71,37 +62,10 @@ export class SyntxAPI {
     return res.json();
   }
 
-  // ✅ ANALYTICS
+  // Analytics
   static async getAnalytics() {
-    const res = await fetch(`${API_BASE}/analytics/complete-dashboard`);
+    const res = await fetch(`${API_BASE}/analytics/overview`);
     if (!res.ok) throw new Error('Failed to fetch analytics');
-    return res.json();
-  }
-
-  static async getTopicsAnalytics() {
-    const res = await fetch(`${API_BASE}/analytics/topics`);
-    if (!res.ok) throw new Error('Failed to fetch topics analytics');
-    return res.json();
-  }
-
-  // ✅ EVOLUTION
-  static async getSyntxVsNormal() {
-    const res = await fetch(`${API_BASE}/evolution/syntx-vs-normal`);
-    if (!res.ok) throw new Error('Failed to fetch evolution data');
-    return res.json();
-  }
-
-  // ✅ MONITORING
-  static async getLiveQueue() {
-    const res = await fetch(`${API_BASE}/monitoring/live-queue`);
-    if (!res.ok) throw new Error('Failed to fetch live queue');
-    return res.json();
-  }
-
-  // ✅ RESONANZ
-  static async getResonanzSystem() {
-    const res = await fetch(`${API_BASE}/resonanz/system`);
-    if (!res.ok) throw new Error('Failed to fetch resonanz system');
     return res.json();
   }
 }
