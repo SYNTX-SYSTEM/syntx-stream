@@ -28,9 +28,9 @@ import {
   SystemTab,
   BirthTab
 } from '@/components/syntx/tabs'
-import LiveQueueOverview from '@/components/krontun/LiveQueueOverview'
+import { KrunField } from '@/components/krontun/KrunField'
 import { StreamMap } from '@/components/calibrax/StreamMap'
-import CronPayloadInspector from '@/components/krontun/CronPayloadInspector'
+// CronPayloadInspector removed - using FieldAnalysisModal in KrunField
 
 const SYNTX_MODES = ['TRUE_RAW', 'CYBERDARK', 'SIGMA', 'FIELD_HYGIENE'] as const
 
@@ -274,8 +274,7 @@ export default function SYNTXOS() {
           {activeTab === 'strom' && <StromTab />}
           {activeTab === 'krontun' && (
             <div className="space-y-8">
-              <LiveQueueOverview />
-              <CronPayloadInspector />
+              <KrunField />
             </div>
           )}  
           {activeTab === 'calibrax' && (

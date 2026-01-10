@@ -4,45 +4,30 @@ interface CronData {
   name: string;
   felder: Record<string, number>;
   modell: string;
-  anzahl: number;
 }
 
-interface CronResult {
-  status: 'active' | 'pending' | 'completed' | 'failed';
-  generated: number;
-  failed: number;
-  avg_quality: number;
-  drift: number;
-  cost: number;
+interface CronStages {
+  parsed_fields: Record<string, string | null>;
+}
+
+interface CronScores {
+  overall: number;
+  field_completeness: number;
+  structure_adherence: number;
+}
+
+interface CronMeta {
   duration_ms: number;
+  retry_count: number;
+  success: boolean;
 }
 
 interface CronLog {
-  cron_id: string;
   timestamp: string;
   cron_data: CronData;
-  result: CronResult;
-}
-
-interface ProcessedFile {
-  file_id: string;
-  cron_id: string;
-  modell: string;
-  topic: string;
-  style: string;
-  quality_score: number;
-  drift: number;
-  prompt: string;
-  filepath: string;
-}
-
-interface TopicImpact {
-  topic: string;
-  timestamp: string;
-  count: number;
-  avg_quality: number;
-  avg_drift: number;
-  modell: string;
+  stages: CronStages;
+  scores: CronScores;
+  meta: CronMeta;
 }
 
 interface QueueStats {
@@ -56,35 +41,22 @@ interface QueueStats {
 interface KrontunStore {
   crons: CronLog[];
   selectedCron: CronLog | null;
-  files: ProcessedFile[];
   stats: QueueStats;
-  impact: TopicImpact[];
   loading: boolean;
   
-  selectCron: (id: string | null) => void;
+  selectCron: (cron: CronLog | null) => void;
   loadLogs: () => Promise<void>;
-  loadFiles: () => Promise<void>;
   loadStats: () => Promise<void>;
-  loadImpact: () => Promise<void>;
-  triggerCron: (id: string) => Promise<void>;
-  updateCron: (id: string, payload: Partial<CronData>) => Promise<void>;
 }
 
-export const useKrontunStore = create<KrontunStore>((set, get) => ({
+export const useKrontunStore = create<KrontunStore>((set) => ({
   crons: [],
   selectedCron: null,
-  files: [],
   stats: { active: 0, pending: 0, completed: 0, failed: 0, total: 0 },
-  impact: [],
   loading: false,
   
-  selectCron: (id) => {
-    if (!id) {
-      set({ selectedCron: null });
-      return;
-    }
-    const cron = get().crons.find(c => c.cron_id === id);
-    set({ selectedCron: cron || null });
+  selectCron: (cron) => {
+    set({ selectedCron: cron });
   },
   
   loadLogs: async () => {
@@ -92,13 +64,12 @@ export const useKrontunStore = create<KrontunStore>((set, get) => ({
     try {
       const res = await fetch('https://dev.syntx-system.com/api/strom/kalibrierung/cron/logs?limit=100');
       const data = await res.json();
-      console.log('Logs response:', data);
+      
       if (data.erfolg && Array.isArray(data.logs)) {
-        // Add safety checks for each log
         const validLogs = data.logs.filter((log: any) => 
-          log.result && 
-          typeof log.result.avg_quality === 'number' &&
-          typeof log.result.drift === 'number'
+          log.scores && 
+          log.meta &&
+          log.cron_data
         );
         set({ crons: validLogs, loading: false });
       } else {
@@ -110,23 +81,11 @@ export const useKrontunStore = create<KrontunStore>((set, get) => ({
     }
   },
   
-  loadFiles: async () => {
-    try {
-      const res = await fetch('https://dev.syntx-system.com/api/strom/processed-files');
-      const data = await res.json();
-      if (data.erfolg) {
-        set({ files: data.files });
-      }
-    } catch (error) {
-      console.error('Failed to load files:', error);
-    }
-  },
-  
   loadStats: async () => {
     try {
       const res = await fetch('https://dev.syntx-system.com/api/strom/kalibrierung/cron/stats');
       const data = await res.json();
-      console.log('Stats response:', data);
+      
       if (data.erfolg) {
         set({ stats: {
           active: data.active || 0,
@@ -138,48 +97,6 @@ export const useKrontunStore = create<KrontunStore>((set, get) => ({
       }
     } catch (error) {
       console.error('Failed to load stats:', error);
-    }
-  },
-  
-  loadImpact: async () => {
-    try {
-      const res = await fetch('https://dev.syntx-system.com/api/strom/kalibrierung/cron/impact');
-      const data = await res.json();
-      if (data.erfolg) {
-        set({ impact: data.impact || [] });
-      }
-    } catch (error) {
-      console.error('Failed to load impact:', error);
-    }
-  },
-  
-  triggerCron: async (id) => {
-    try {
-      const url = 'https://dev.syntx-system.com/api/strom/kalibrierung/cron/' + id + '/run';
-      const res = await fetch(url, { method: 'POST' });
-      const data = await res.json();
-      if (data.erfolg) {
-        await get().loadLogs();
-      }
-    } catch (error) {
-      console.error('Failed to trigger cron:', error);
-    }
-  },
-  
-  updateCron: async (id, payload) => {
-    try {
-      const url = 'https://dev.syntx-system.com/api/strom/kalibrierung/cron/' + id;
-      const res = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.erfolg) {
-        await get().loadLogs();
-      }
-    } catch (error) {
-      console.error('Failed to update cron:', error);
     }
   }
 }));
