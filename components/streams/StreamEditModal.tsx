@@ -187,7 +187,7 @@ export function StreamEditModal({ isOpen, onClose, stream }: StreamEditModalProp
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-2xl bg-slate-950/95 rounded-3xl border border-purple-500/30 shadow-2xl overflow-hidden"
             >
-              {/* Rest of modal JSX stays the same... */}
+              {/* Header */}
               <div className="flex items-center gap-4 p-6 border-b border-slate-800">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                   <Edit3 className="w-7 h-7 text-white" />
@@ -201,8 +201,9 @@ export function StreamEditModal({ isOpen, onClose, stream }: StreamEditModalProp
                 </button>
               </div>
 
+              {/* Form */}
               <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                {/* All form fields same as before */}
+                {/* Stream Identity */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold text-purple-400 mb-2">
                     <Brain className="w-4 h-4" />
@@ -217,11 +218,140 @@ export function StreamEditModal({ isOpen, onClose, stream }: StreamEditModalProp
                   />
                 </div>
 
+                {/* Model */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-purple-400 mb-2">
+                    <Zap className="w-4 h-4" />
+                    MODEL
+                  </label>
+                  <select
+                    value={modell}
+                    onChange={(e) => setModell(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white focus:border-purple-500 focus:outline-none"
+                  >
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="claude-sonnet-4">Claude Sonnet 4</option>
+                  </select>
+                </div>
+
+                {/* Temporal Matrix */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-purple-400 mb-3">
+                    <Calendar className="w-4 h-4" />
+                    TEMPORAL MATRIX
+                  </label>
+                  
+                  {/* Days */}
+                  <div className="grid grid-cols-7 gap-2 mb-4">
+                    {DAYS.map((day) => (
+                      <button
+                        key={day.key}
+                        type="button"
+                        onClick={() => toggleDay(day.key)}
+                        className={`aspect-square rounded-xl border-2 font-bold text-sm transition-all ${getColorClasses(
+                          day.color,
+                          selectedDays.includes(day.key)
+                        )}`}
+                      >
+                        {day.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Hour</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={hour}
+                        onChange={(e) => setHour(parseInt(e.target.value))}
+                        className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Minute</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={minute}
+                        onChange={(e) => setMinute(parseInt(e.target.value))}
+                        className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-2 text-xs text-slate-500 font-mono">
+                    Cron: {generateCron()}
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-purple-400 mb-2">
+                    <Globe className="w-4 h-4" />
+                    LANGUAGE RESONANCE
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['DE', 'EN', 'ES', 'FR'].map((lang) => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => toggleLanguage(lang.toLowerCase())}
+                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                          sprachen.includes(lang.toLowerCase())
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Styles */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-purple-400 mb-2">
+                    <Dna className="w-4 h-4" />
+                    STYLE ALCHEMY
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['technisch', 'akademisch', 'literarisch', 'poetisch'].map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => toggleStyle(style)}
+                        className={`px-4 py-2 rounded-full font-medium text-sm transition-all ${
+                          styles.includes(style)
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {style}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
                 <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 py-3 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" disabled={loading} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 font-bold flex items-center justify-center gap-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 font-bold flex items-center justify-center gap-2"
+                  >
                     <Save className="w-5 h-5" />
                     {loading ? 'Updating...' : 'Update Stream'}
                   </button>
